@@ -24,9 +24,9 @@ const message = "chao moi nguoi";
 io.on("connection", (socket) => {
   console.log("Client đã kết nối");
 
-  socket.on("send message from client to server", (message) => {
-    console.log("client to server: ", message);
-    io.emit("remessage from server to client", message);
+
+  io.on("send message from client to server", (message) => {
+    console.log(message);
   });
 
   // Xử lý sự kiện ngắt kết nối của client

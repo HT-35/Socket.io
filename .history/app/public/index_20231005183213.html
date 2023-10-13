@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>tran quang huy</h1>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // yêu cầu server kết nối tới client
+        var socket = io();
+
+        // receive count from server to client
+        socket.on("send Count server to client",(count)=>{
+            console.log("da nhan dc count: " + count);
+        });
+
+        socket.on("mess")
+    </script>
+</body>
+</html>

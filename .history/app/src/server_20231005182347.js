@@ -17,17 +17,13 @@ const publicPath = path.join(__dirname, "../public");
 
 app.use(express.static(publicPath));
 
-let count = 0;
-const message = "chao moi nguoi";
+let count = 1;
 
 // Sự kiện kết nối khi có một client kết nối
 io.on("connection", (socket) => {
   console.log("Client đã kết nối");
 
-  socket.on("send message from client to server", (message) => {
-    console.log("client to server: ", message);
-    io.emit("remessage from server to client", message);
-  });
+  //truyen count từ
 
   // Xử lý sự kiện ngắt kết nối của client
   socket.on("disconnect", () => {
