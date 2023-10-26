@@ -6,17 +6,16 @@
     <title>Document</title>
 </head>
 <body>
-   <main>
+    <h1>join room </h1>
 
-    <h1>Chat with Phương</h1>
-    <form id="form-messages" action="">
-        <input type="text" id="input-messages">
-        <button type="submit">Gửi</button>
+    <form action="/chat.html">
+        <h1>Join room</h1>
+        <input type="text" name="room" id="room" placeholder="Nhap room di d m m ">
+        <input type="text" name="username" id="username" placeholder="nhap username">
+        <button type="submit">Dang Nhap</button>
+
     </form>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="./js/client-chat.js">  </script>
 
-   </main>
 </body>
 </html>
