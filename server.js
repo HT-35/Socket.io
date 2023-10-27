@@ -1,15 +1,19 @@
 const express = require("express");
 const app = express();
 
+//==================================================================
+
 const path = require("path");
 const http = require("http");
 const port = 3000;
 const { v4: uuidv4 } = require("uuid");
 
-const { createUserList, getUserList } = require("./utils/users");
+const { createUserList, getUserList } = require("./app/src/utils/users");
 
 // func tao mess có time-format
-const messageCleanTimeFormat = require("./utils/create-messages");
+const messageCleanTimeFormat = require("./app/src/utils/create-messages");
+
+const saveImgMap = require("./app/src/utils/createImgMap");
 
 // import package bad-word
 const Filter = require("bad-words");
@@ -25,7 +29,7 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 // vì file public chưa luôn file html nên chỉ cần đường dẫn đến file public
-const publicPath = path.join(__dirname, "../public");
+const publicPath = path.join(__dirname, "./app/public");
 // express sử dụng public làm đường dẫn chính, và hiển thị file index.html
 app.use(express.static(publicPath));
 
@@ -97,15 +101,25 @@ io.on("connection", (socket) => {
 
     // ================== get location ===================================
 
-    socket.on("share location from client to server", (e) => {
+    socket.on("share location from client to server", async (e ) => {
+      // const e = {
+      //   latitude: 10.951819,
+      //   longitude: 106.868286,
+      // };
       const location = `https://www.google.com/maps?q=${e.latitude},${e.longitude}`;
-      // console.log(location);
+
+      // console.log(e);
+
+      await saveImgMap(e);
+      const locationtime = messageCleanTimeFormat(location);
+      const pathimg = `${e.latitude}N${e.longitude}E.png`;
+
       io.to(room).emit("share Url location from server to client", {
         username,
-        location,
+        locationtime,
+        pathimg,
       });
     });
-
     //========== handle userList=============
 
     io.to(room).emit("send userList From Server to Client", getUserList(room));
@@ -122,6 +136,7 @@ io.on("connection", (socket) => {
 // khởi tạo server từ serer : server = http.createServer(app);
 // vì io = socketio(server) nên khi client sử dụng socket.io
 // thì server  sẽ nhận đc và dùng : io.on("connection", (socket) => {}
+
 server.listen(port, () => {
   console.log(`Server đang chạy tại http://localhost:${port}`);
 });

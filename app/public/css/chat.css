@@ -105,3 +105,14 @@
   width: 100px;
   font-size: 18px;
 }
+
+.img_map {
+  border: black 5px solid;
+  border-radius: 0 0 10% 10%;
+  width: 800px;
+  height: 460px;
+}
+
+.img_map:hover {
+  opacity: 0.5;
+}
