@@ -4,6 +4,9 @@ const app = express();
 const path = require("path");
 const http = require("http");
 const port = 3000;
+const { v4: uuidv4 } = require("uuid");
+
+const { createUserList, getUserList } = require("./utils/users");
 
 // func tao mess có time-format
 const messageCleanTimeFormat = require("./utils/create-messages");
@@ -43,19 +46,21 @@ io.on("connection", (socket) => {
     // gom tất cả các user có cùng room thành 1 phòng
     socket.join(room);
 
-    // ================== get location ===================================
+    // create user in list
 
-    socket.on("share location from client to server", (e) => {
-      const location = `https://www.google.com/maps?q=${e.latitude},${e.longitude}`;
-      // console.log(location);
-      io.to(room).emit("share Url location from server to client", {
-        username,
-        location,
-      });
-    });
+    let newUser = {
+      id: socket.id,
+      username,
+      room,
+    };
 
+    console.log("New user: ", newUser);
+
+    createUserList(newUser);
+
+    //=== Message
     socket.on("send message from client to server", (message, callback) => {
-      // console.log(`client to server (username : ${username}) : `, message);
+      console.log(message);
 
       // ==========Xử lý từ bad================
 
@@ -81,12 +86,32 @@ io.on("connection", (socket) => {
       const texted = messageCleanTimeFormat(Textclear);
 
       // io chỉ gửi text đến room mà user gửi vào
-      io.to(room).emit("remessage from server to client", { username, texted });
+      io.to(room).emit("remessage from server to client", {
+        username,
+        texted,
+      });
 
       // io.to(room).emit("remessage from server to client", texted);
       callback();
     });
+
+    // ================== get location ===================================
+
+    socket.on("share location from client to server", (e) => {
+      const location = `https://www.google.com/maps?q=${e.latitude},${e.longitude}`;
+      // console.log(location);
+      io.to(room).emit("share Url location from server to client", {
+        username,
+        location,
+      });
+    });
+
+    //========== handle userList=============
+
+    io.to(room).emit("send userList From Server to Client", getUserList(room));
   });
+
+  /////////////////////////
 
   // Xử lý sự kiện ngắt kết nối của client
   socket.on("disconnect", () => {

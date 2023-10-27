@@ -1,52 +1,36 @@
+// yếu cầu server kết nối với client
 const socket = io();
 
-const formSubmit = document.getElementById("form-messages");
-//===welcome user ============
-
-const h1Welcome = document.querySelector(".h1Welcome");
-socket.on("welcome user", (textWelcome) => {
-  console.log(textWelcome);
-  h1Welcome.textContent = `${textWelcome.Textclear} (${textWelcome.creatAt})`;
-});
-
-// =====send and hanle bad-word=====
-formSubmit.addEventListener("submit", (e) => {
+document.getElementById("form-messages").addEventListener("submit", (e) => {
   e.preventDefault();
-  const message = document.getElementById("input-messages").value;
-
-  // acknowledgement là tham số thứ 3 của emit để gửi tới client to server hoặc ngược lại
-  // vì tham số acknowledgement là tham số thứ 3 nên khi server xử lý func xảy ra lỗi thì chỉ cần return callback mà không cầm socket.emit thì bên phía client vẫn nhận được acknowledgement và hiển thị cho người dùng
-  const acknowledgement = (err) => {
-    if (err) {
-      return alert("m sủa dơ vậy thằng lol !!");
+  // console.log("hello");
+  const messageText = document.getElementById("input-messages").value;
+  console.log(messageText);
+  const acknowledgements = (errors) => {
+    if (errors) {
+      return alert("tin nhắn không hợp lệ");
     }
-    console.log("ban da gui tin nhan thanh cong");
+    console.log("tin nhắn đã gửi thành công");
   };
-  // console.log(message);
-
-  // tham số thứ nhất là key-word để server nhận event
-  //tham số thứ 2 là thứ cần gửi
-  // tham số thứ 3 là acknowledgement : thông báo cho người dùng  biết về trạng thái gửi tin nhắn
-  socket.emit("send message from client to server", message, acknowledgement);
+  socket.emit(
+    "send message from client to server",
+    messageText,
+    acknowledgements
+  );
 });
 
-socket.on("remessage from server to client", (messageClean) => {
-  const userSendMess = `${messageClean.username} : ${messageClean.texted.Textclear}`;
-
-  console.log(userSendMess);
+socket.on("remessage from server to client", ({ username, texted }) => {
+  console.log(`${username} :`, texted);
 });
 
-//========== Lấy kinh độ và vĩ độ ===============
-
-document.querySelector("#btn-share-location").addEventListener("click", () => {
+// gửi vị trí
+document.getElementById("btn-share-location").addEventListener("click", () => {
   if (!navigator.geolocation) {
-    return alert("browser not support location.");
+    return alert("trình duyệt đang dùng không có hổ trợ tìm ví");
   }
-  navigator.geolocation.getCurrentPosition((positon) => {
-    // console.log(positon);
-    const { latitude, longitude } = positon.coords;
-    // console.log(latitude, longitude);
-    // gửi kinh độ và vĩ độ cho server
+  navigator.geolocation.getCurrentPosition((position) => {
+    console.log("position from client : ", position);
+    const { latitude, longitude } = position.coords;
     socket.emit("share location from client to server", {
       latitude,
       longitude,
@@ -54,22 +38,24 @@ document.querySelector("#btn-share-location").addEventListener("click", () => {
   });
 });
 
-// nhận url google map từ server :
-socket.on(
-  "share Url location from server to client",
-  ({ username, location }) => {
-    console.log(`${username}:    `, location);
-  }
-);
-// ========Time=========
+socket.on("share location from server to client", (linkLocation) => {
+  console.log("linkLocation : ", linkLocation);
+});
 
-// ========== Get Url : Join Room  ===========
+// xử lý query string
+const queryString = location.search;
 
-const url = window.location.search;
-console.log(url);
-
-const params = Qs.parse(url, { ignoreQueryPrefix: true });
+const params = Qs.parse(queryString, {
+  ignoreQueryPrefix: true,
+});
 
 const { room, username } = params;
 
 socket.emit("send params from client to server", { room, username });
+
+// nhận user list và hiển thị lên màn hình
+socket.on("send user list from server to client", (userList) => {
+  console.log(userList);
+});
+
+//  ======================================================================
